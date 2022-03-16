@@ -1,22 +1,40 @@
-import { table } from 'console'
-import Head from 'next/head'
-import BasicTable from '../components/table'
+import React, { useState, useEffect } from "react";
+export default function App() {
 
-export default function Home() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch("http://subscription-service-api.azurewebsites.net/subscribers")
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw response;
+      })
+      .then((data) => {
+        setData(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data: ", error);
+        setError(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return "Loading...";
+  if (error) return "Error!";
   return (
-    <div className="bg-black h-screen overflow-hidden ">
-      <Head>
-        <title>OMS</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main>
-        { BasicTable }
-      </main>
-
-      <div>  </div>
-
-
-
+    <div style={{ textAlign: "center" }}>
+      <img src={data.avatar_url} alt="Avatar" height="100" />
+      <p>Name: {data.name}</p>
+      <p>Bio: {data.bio}</p>
+      <p>Username: {data.login}</p>
+      <p>Location: {data.location}</p>
+      <p>Public Repos: {data.public_repos}</p>
     </div>
-  )
+  );
 }
